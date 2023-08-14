@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import org.littlestar.mysql.ibd.parser.ColumnMeta;
 import org.littlestar.mysql.ibd.parser.KeyMeta;
+import org.littlestar.mysql.ibd.parser.TableMeta;
 
 public class SecondaryKeyLeafPage extends IndexPage {
 
@@ -35,11 +36,9 @@ public class SecondaryKeyLeafPage extends IndexPage {
 					nullableColumnCount++;
 				}
 			}
+			
 			for (ColumnMeta meta : clusterKeyMeta.getKeyColumns()) {
 				clusterKeyFields.add(new RecordField(meta));
-				if (meta.isNullable()) {
-					nullableColumnCount++;
-				}
 			}
 			
 			final List<RecordField> combinKeyFields = new ArrayList<RecordField>();
@@ -139,6 +138,24 @@ public class SecondaryKeyLeafPage extends IndexPage {
 		}
 		int pos = getSystemRecords().getInfimumNextRecordPos();
 		return iterateRecordInPage(secondaryKeyMeta, clusterKeyMeta, pos);
+	}
+	
+	public List<SecondaryKeyLeafRecord> getUserRecords(TableMeta tableMeta, long indexId) {
+		KeyMeta secondaryKeyMeta = tableMeta.getSecondaryKey(indexId);
+		KeyMeta clusterKeyMeta = tableMeta.getClusterKey();
+		if (Objects.isNull(secondaryKeyMeta)) {
+			throw new RuntimeException("secondary key meta not found or is null in table meta, index id: " + indexId);
+		}
+		if (Objects.isNull(clusterKeyMeta)) {
+			throw new RuntimeException("cluster key meta not found or is null in table meta");
+		}
+		int pos = getSystemRecords().getInfimumNextRecordPos();
+		return iterateRecordInPage(secondaryKeyMeta, clusterKeyMeta, pos);
+	}
+	
+	public List<SecondaryKeyLeafRecord> getUserRecords(TableMeta tableMeta) {
+		long indexId = getIndexHeader().getIndexId().longValueExact();
+		return getUserRecords(tableMeta, indexId);
 	}
 	
 	/**

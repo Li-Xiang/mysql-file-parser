@@ -59,7 +59,7 @@ public class SdiPage extends IndexPage {
 	
 	private final String typeFieldName = "type";
 	private final String idFieldName = "id";
-	private final String trxIdFieldName = ColumnType.DB_ROLL_PTR;
+	private final String trxIdFieldName = ColumnType.DB_TRX_ID;
 	private final String rollPrtFieldName = ColumnType.DB_ROLL_PTR;
 	private final String uncompressedLenFieldName = "uncompressed_len";
 	private final String compressedLenFieldName = "compressed_len";

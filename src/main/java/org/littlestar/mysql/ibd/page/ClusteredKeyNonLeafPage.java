@@ -23,6 +23,7 @@ public class ClusteredKeyNonLeafPage extends IndexPage {
 		final List<ClusteredKeyNonLeafRecord> clusteredKeyNonLeafRecords = new ArrayList<ClusteredKeyNonLeafRecord>();
 		int currentPos = firstRecordPos;
 		int recCount = 0;
+		int nullableBitmapBytes = (tableMeta.getNullableColumnCount() + 7) / 8;
 		while (currentPos > SUPREMUM_EXTRA_END_POS && currentPos <= getIndexHeader().getHeapTopPosition()) {
 			final List<RecordField> clusterKeyFields = new ArrayList<RecordField>();
 			for (ColumnMeta meta : tableMeta.getClusterKey().getKeyColumns()) {
@@ -40,7 +41,6 @@ public class ClusteredKeyNonLeafPage extends IndexPage {
 			// 主键的非叶点节记录会存储整个表的空值位图, MySQL主键的所有字段都不允许为空, 不理解为什么要存储null-field-bitmap。
 			// ERROR 1171 (42000): All parts of a PRIMARY KEY must be NOT NULL; if you need
 			// NULL in a key, use UNIQUE instead
-			int nullableBitmapBytes = (tableMeta.getNullableColumnCount() + 7) / 8;
 			from -= nullableBitmapBytes;
 
 			int vfrom = 0, vto = from;

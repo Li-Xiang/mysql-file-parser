@@ -43,11 +43,15 @@ public class SecondaryKeyNonLeafPage extends IndexPage {
 	 */
 	public List<SecondaryKeyNonLeafRecord> getUserRecords(TableMeta tableMeta, long indexId) {
 		KeyMeta secondaryKeyMeta = tableMeta.getSecondaryKey(indexId);
+		KeyMeta clusterKeyMeta = tableMeta.getClusterKey();
 		if (Objects.isNull(secondaryKeyMeta)) {
 			throw new RuntimeException("secondary key meta not found or is null in table meta, index id: " + indexId);
 		}
+		if (Objects.isNull(clusterKeyMeta)) {
+			throw new RuntimeException("cluster key meta not found or is null in table meta");
+		}
 		int pos = getSystemRecords().getInfimumNextRecordPos();
-		return iterateRecordInPage(tableMeta, secondaryKeyMeta, pos);
+		return iterateRecordInPage(secondaryKeyMeta, clusterKeyMeta, pos);
 	}
 
 	/**
@@ -57,13 +61,12 @@ public class SecondaryKeyNonLeafPage extends IndexPage {
 	 * @param secondaryKeyMeta 索引定义
 	 * @return record list of this page
 	 */
-	public List<SecondaryKeyNonLeafRecord> getUserRecords(TableMeta tableMeta, KeyMeta secondaryKeyMeta) {
+	public List<SecondaryKeyNonLeafRecord> getUserRecords(KeyMeta secondaryKeyMeta, KeyMeta clusterKeyMeta) {
 		int pos = getSystemRecords().getInfimumNextRecordPos();
-		return iterateRecordInPage(tableMeta, secondaryKeyMeta, pos);
+		return iterateRecordInPage(secondaryKeyMeta, clusterKeyMeta, pos);
 	}
 	
-	private List<SecondaryKeyNonLeafRecord> iterateRecordInPage(TableMeta tableMeta, KeyMeta secondaryKeyMeta, int firstRecordPos) {
-		KeyMeta clusterKeyMeta = tableMeta.getClusterKey();
+	private List<SecondaryKeyNonLeafRecord> iterateRecordInPage(KeyMeta secondaryKeyMeta, KeyMeta clusterKeyMeta, int firstRecordPos) {
 		final List<SecondaryKeyNonLeafRecord> records = new ArrayList<SecondaryKeyNonLeafRecord>();
 		int currentPos = firstRecordPos;
 		int recCount = 0;
@@ -73,8 +76,9 @@ public class SecondaryKeyNonLeafPage extends IndexPage {
 			int nullableBitmapBytes = 0;
 			for (ColumnMeta meta : secondaryKeyMeta.getKeyColumns()) {
 				if (meta.isNullable()) {
-					secondaryKeyFields.add(new RecordField(meta));
+					nullableBitmapBytes++;
 				}
+				secondaryKeyFields.add(new RecordField(meta));
 			}
 			for (ColumnMeta meta : clusterKeyMeta.getKeyColumns()) {
 				clusterKeyFields.add(new RecordField(meta));

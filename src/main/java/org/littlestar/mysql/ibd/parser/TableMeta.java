@@ -25,6 +25,15 @@ public class TableMeta {
 	public ColumnMeta getColumn(int pos) {
 		return columnMap.get(pos);
 	}
+	
+	public ColumnMeta getColumn(String columnName) {
+		for (ColumnMeta column : columnMap.values()) {
+			if (Objects.equals(column.getName(), columnName)) {
+				return column;
+			}
+		}
+		return null;
+	}
 
 	public TableMeta addColumn(ColumnMeta column) {
 		if (Objects.nonNull(column)) {
@@ -73,6 +82,9 @@ public class TableMeta {
 	}
 	
 	public TableMeta setSecondaryKey(long indexId, int seqInindex, ColumnMeta column) {
+		if (Objects.isNull(column)) {
+			throw new RuntimeException("column meta of secondary key is null.");
+		}
 		KeyMeta key = secondaryKeys.get(indexId);
 		if (Objects.isNull(key)) {
 			key = new KeyMeta();
@@ -81,6 +93,23 @@ public class TableMeta {
 		}
 		key.setKeyColumn(seqInindex, column);
 		return this;
+	}
+	
+	public TableMeta setSecondaryKey(long indexId, int seqInindex, int colPosInTable) {
+		ColumnMeta column = getColumn(colPosInTable);
+		if (Objects.isNull(column)) {
+			throw new RuntimeException(
+					"column meta not found or is null in table meta: colPosInTable = " + colPosInTable);
+		}
+		return setSecondaryKey(indexId, seqInindex, column);
+	}
+	
+	public TableMeta setSecondaryKey(long indexId, int seqInindex, String columnName) {
+		ColumnMeta column = getColumn(columnName);
+		if (Objects.isNull(column)) {
+			throw new RuntimeException("column meta not found or is null in table meta: columnName = " + columnName);
+		}
+		return setSecondaryKey(indexId, seqInindex, column);
 	}
 
 	/**

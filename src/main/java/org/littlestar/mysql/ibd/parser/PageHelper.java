@@ -257,11 +257,11 @@ public class PageHelper {
 		return buff.toString();
 	}
 	
+	
 	public static String dumpIndexPage(IndexPage page, TableMeta tableMeta) {
 		StringBuilder buff = new StringBuilder();
 		FilHeader pgHealer = page.getFilHeader();
 		IndexHeader idxHeader = page.getIndexHeader();
-		long indexId = idxHeader.getIndexId().longValueExact();
 		FsegHeader fsHeader = page.getFsegHeader();
 		SystemRecords systemRecords = page.getSystemRecords();
 		
@@ -281,9 +281,7 @@ public class PageHelper {
 			List<ClusteredKeyNonLeafRecord> userRecords = ((ClusteredKeyNonLeafPage) page).getUserRecords(tableMeta);
 			buff.append(dumpClusteredKeyNonLeafRecords(userRecords)).append(NL);
 		} else if (page instanceof SecondaryKeyLeafPage) {
-			KeyMeta secondaryKeyMeta = tableMeta.getSecondaryKey(indexId);
-			KeyMeta clusterKeyMeta = tableMeta.getClusterKey();
-			List<SecondaryKeyLeafRecord> userRecords = ((SecondaryKeyLeafPage) page).getUserRecords(secondaryKeyMeta, clusterKeyMeta);
+			List<SecondaryKeyLeafRecord> userRecords = ((SecondaryKeyLeafPage) page).getUserRecords(tableMeta);
 			buff.append(dumpSecondaryKeyLeafRecords(userRecords)).append(NL);
 		} else if (page instanceof SecondaryKeyNonLeafPage) {
 			List<SecondaryKeyNonLeafRecord> userRecords = ((SecondaryKeyNonLeafPage) page).getUserRecords(tableMeta);
